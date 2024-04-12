@@ -43,13 +43,13 @@ SSH: # "SSH"는 이 작업의 식별자입니다. 작업의 이름은 사용자�
           host: ${{ secrets.EC2_HOST }} # GitHub Secrets에서 저장된 EC2의 호스트 주소를 사용합니다.
           username: ${{ secrets.EC2_USERNAME }} # GitHub Secrets에서 저장된 EC2의 사용자 이름을 사용합니다.
           key: ${{ secrets.SSH_PRIVATE_KEY }} # GitHub Secrets에서 저장된 SSH의 비밀 키를 사용합니다.
-          script: | # SSH 접속 후 실행할 스크립트를 정의합니다.
-			  mkdir -p /home/ec2-user/upload # "/home/ec2-user/upload" 디렉토리가 없으면 생성합니다.
-			  sudo docker pull clz2024red/guestbook:latest # Docker Hub에서 최신 이미지를 가져옵니다.
-			  sudo docker stop guestbook || true # "mysite"라는 이름의 도커 컨테이너가 실행 중이면 정지합니다. 실행 중이지 않아도 에러가 발생하지 않도록 합니다.
-			  sudo docker rm guestbook || true # "mysite" 컨테이너를 제거합니다. 컨테이너가 존재하지 않아도 에러가 발생하지 않도록 합니다.
-			  sudo docker run -d \ # "mysite" 이미지로 새로운 도커 컨테이너를 백그라운드 모드(-d)로 실행합니다.
-			    --name phonebook \ # 컨테이너의 이름을 "mysite"로 지정합니다.
-			    -p 9000:9000 \ # 호스트의 9000 포트와 컨테이너의 9000 포트를 바인딩합니다.
-			    -v /home/ec2-user/upload:/app/upload \ # 호스트의 "/home/ec2-user/upload" 디렉토리와 컨테이너의 "/app/upload" 디렉토리를 볼륨으로 마운트합니다.
-			    clz2024red/guestbook:latest # 사용할 이미지를 지정합니다.
+          script: |
+            mkdir -p /home/ec2-user/upload
+            sudo docker pull clz2024red/guestbook:latest
+            sudo docker stop phonebook || true
+            sudo docker rm phonebook || true
+            sudo docker run -d \
+              --name phonebook \
+              -p 9000:9000 \
+              -v /home/ec2-user/upload:/app/upload \
+              clz2024red/guestbook:latest
