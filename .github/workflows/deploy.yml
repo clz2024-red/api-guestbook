@@ -1,9 +1,16 @@
 name: Deploy GuestbookApp  #워크플로워 이름
 
+
+
+
 on:
-  push:
-    branches:
-      - master # 또는 프로젝트의 기본 브랜치명
+  workflow_dispatch:
+    inputs:
+
+#on:
+#  push:
+#    branches:
+#      - master # 또는 프로젝트의 기본 브랜치명
   
 jobs:
   build-and-deploy:
