@@ -12,3 +12,5 @@ public class MainController {
 		return "foword:/index.html";
 	}
 }
+
+
