@@ -9,7 +9,7 @@ public class MainController {
 	@GetMapping(value="")
 	public String index() {
 		System.out.println("MainController.index()");
-		return "foward:/index.html";
+		return "forward:/index.html";
 	}
 }
 
