@@ -11,7 +11,7 @@ public class ErrController implements ErrorController {
 
     @GetMapping(ERROR_PATH)
     public String redirectRoot(){
-        return "forward:/index.html";
+        return "index.html";
     }
 
     public String getErrorPath(){
