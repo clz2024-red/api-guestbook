@@ -28,7 +28,7 @@ jobs:
          run: mvn clean package
          
        - name: Build Docker image
-         run: docker build -t api-phonebook:latest .
+         run: docker build -t clz2024red/guestbook:latest .
          #run: docker build . -t clz2024red/guestbook:latest  
 
        - name: Log in to Docker Hub
