@@ -1,55 +1,49 @@
-on: # "on"은 어떤 이벤트가 발생했을 때 GitHub Actions 워크플로우를 실행할지를 정의합니다.
-  push: # "push" 이벤트가 발생했을 때, 즉 코드가 저장소에 푸시됐을 때 워크플로우가 실행되도록 설정합니다.
-    branches: # "branches"는 특정 브랜치에 푸시된 경우에만 워크플로우를 실행하도록 제한합니다.
-      - master # "master" 브랜치에 코드가 푸시되었을 때만 워크플로우가 실행됩니다. "master"는 전통적으로 프로젝트의 주 브랜치로 사용되며, 최근에는 "main"으로 대체되는 추세입니다.
-      
-      
-jobs: # "jobs"는 여러 작업들을 정의하는 부분입니다. 여기서 정의된 각 작업은 독립적으로 또는 다른 작업들과의 의존성에 따라 실행될 수 있습니다.
-  build-and-deploy: # "build-and-deploy"는 이 작업의 식별자입니다. 이 이름은 워크플로우 내에서 이 특정 작업을 참조하는 데 사용됩니다.
-    runs-on: ubuntu-latest # "runs-on"은 작업이 실행될 환경을 지정합니다. 여기서는 최신 버전의 Ubuntu 가상 환경에서 실행하도록 설정합니다.
-    steps: # "steps"는 작업 내에서 실행될 단계들을 정의합니다. 각 단계는 순차적으로 실행됩니다.
-      - name: Checkout code # 이 단계의 이름입니다. 이 단계에서는 코드를 체크아웃(복사하여 가져오기)하는 작업을 수행합니다.
-        uses: actions/checkout@v3 # GitHub의 'checkout' 액션을 사용하여 코드를 체크아웃합니다. 여기서는 버전 3을 사용합니다.
+name: Deploy Phonebook App
 
-      - name: Set up JDK 17 # 이 단계에서는 Java Development Kit(JDK) 17을 설정합니다.
-        uses: actions/setup-java@v2 # GitHub의 'setup-java' 액션을 사용하여 JDK를 설정합니다. 여기서는 버전 2를 사용합니다.
-        with: # "with"는 액션에 전달할 추가 설정입니다.
-          java-version: '17' # 사용할 Java의 버전을 지정합니다.
-          distribution: 'temurin' # 사용할 Java의 배포판을 지정합니다. 여기서는 'temurin'을 사용합니다.
+on:
+  push:
+    branches:
+      - master # 또는 프로젝트의 기본 브랜치명
 
-      - name: Build with Maven # 이 단계에서는 Maven을 사용하여 프로젝트를 빌드합니다.
-        run: mvn clean package # Maven 명령어를 실행하여 프로젝트를 클린 빌드하고 패키지합니다.
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Build Docker image # 이 단계에서는 Docker 이미지를 빌드합니다.
-        run: docker build . -t clz2024red/guestbook:latest # Docker 명령어를 사용하여 현재 디렉토리의 Dockerfile을 기반으로 이미지를 빌드하고 태그를 지정합니다.
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-      - name: Log in to Docker Hub # 이 단계에서는 Docker Hub에 로그인합니다.
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin # GitHub Secrets에서 저장된 Docker Hub의 비밀번호를 사용하여 Docker Hub에 로그인합니다.
+      - name: Build with Maven
+        run: mvn clean package
 
-      - name: Push Docker image to Docker Hub # 이 단계에서는 빌드한 Docker 이미지를 Docker Hub에 푸시합니다.
-        run: docker push clz2024red/guestbook:latest # Docker 명령어를 사용하여 이미지를 Docker Hub에 푸시합니다.
+      - name: Build Docker image
+        run: docker build . -t clz2024red/guestbook:latest
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Push Docker image to Docker Hub
+        run: docker push clz2024red/guestbook:latest
         
         
-        
-        
-SSH: # "SSH"는 이 작업의 식별자입니다. 작업의 이름은 사용자가 자유롭게 지정할 수 있습니다.
-    needs: build-and-deploy # "needs"는 이 작업이 실행되기 전에 완료되어야 하는 다른 작업을 지정합니다. 여기서는 "build-and-deploy" 작업이 완료된 후에 "SSH" 작업이 시작됩니다.
-    runs-on: ubuntu-latest # "runs-on"은 작업이 실행될 환경을 지정합니다. 여기서는 최신 버전의 Ubuntu 가상 환경에서 실행하도록 설정합니다.
-    steps: # "steps"는 작업 내에서 실행될 단계들을 정의합니다. 각 단계는 순차적으로 실행됩니다.
-      - uses: actions/checkout@v3 # GitHub의 'checkout' 액션을 사용하여 코드를 체크아웃합니다. 여기서는 버전 3을 사용합니다.
-      - name: ssh to ec2 # 이 단계의 이름입니다. 여기서는 EC2 인스턴스에 SSH로 접속하는 작업을 수행합니다.
-        uses: appleboy/ssh-action@master # "appleboy/ssh-action@master" 액션을 사용하여 SSH 접속을 수행합니다. 이 액션은 GitHub 마켓플레이스에서 제공되는 것으로, SSH 연결을 쉽게 설정할 수 있게 도와줍니다.
-        with: # "with"는 액션에 전달할 추가 설정입니다.
-          host: ${{ secrets.EC2_HOST }} # GitHub Secrets에서 저장된 EC2의 호스트 주소를 사용합니다.
-          username: ${{ secrets.EC2_USERNAME }} # GitHub Secrets에서 저장된 EC2의 사용자 이름을 사용합니다.
-          key: ${{ secrets.SSH_PRIVATE_KEY }} # GitHub Secrets에서 저장된 SSH의 비밀 키를 사용합니다.
+  SSH:
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: ssh to ec2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            mkdir -p /home/ec2-user/upload
             sudo docker pull clz2024red/guestbook:latest
-            sudo docker stop phonebook || true
-            sudo docker rm phonebook || true
-            sudo docker run -d \
-              --name phonebook \
-              -p 9000:9000 \
-              -v /home/ec2-user/upload:/app/upload \
-              clz2024red/guestbook:latest
+            sudo docker stop guestbook || true
+            sudo docker rm guestbook || true
+            sudo docker run -d --name phonebook -p 9000:9000 clz2024red/guestbook:latest
