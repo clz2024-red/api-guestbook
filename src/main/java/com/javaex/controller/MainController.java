@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class MainController {
 
-	@GetMapping(value="/")
+	@GetMapping(value="")
 	public String index() {
 		System.out.println("MainController.index()");
-		return "foword:/index.html";
+		return "foward:/index.html";
 	}
 }
 
